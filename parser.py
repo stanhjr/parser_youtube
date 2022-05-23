@@ -5,6 +5,8 @@ import time
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from fake_useragent import UserAgent
+# from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 from tools import click_on_video_update
 
@@ -17,11 +19,6 @@ def get_name_search(query_name: str) -> str:
     return query_name
 
 
-def get_video_settings(path_file):
-    with open(path_file, "r") as f:
-        return [x.strip() for x in f.readlines()]
-
-
 def parser(login, password, ip, port, query, search_title_video, viewing_time):
     proxy_server = f"{ip}:{port}"
     proxy_options = {
@@ -29,13 +26,15 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
             "https": f"http://{login}:{password}@{proxy_server}"
         }
     }
+
     user_agent = UserAgent()
     options = webdriver.ChromeOptions()
     options.add_argument(f"user-agent={user_agent.random}")
 
-    driver = webdriver.Chrome("/usr/bin/chromedriver",
-                              options=options,
-                              seleniumwire_options=proxy_options)
+    prefs = {"profile.managed_default_content_settings.images": 2}
+    options.add_experimental_option("prefs", prefs)
+
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, seleniumwire_options=proxy_options)
     driver.maximize_window()
 
     driver.get(f"https://www.youtube.com/results?search_query={query}")
@@ -80,9 +79,19 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
 
 
 if __name__ == '__main__':
+
+    driver = None
     now = time.time()
-    query, search_title_video, viewing_time = get_video_settings("video_settings.txt")
-    query = get_name_search(query)
+
+    settings = []
+    with open("settings.txt", "r", encoding='utf-8') as f:
+        for line in f.readlines():
+            settings.append(line.replace("\n", ""))
+
+    query = get_name_search(settings[0])
+    search_title_video = settings[1]
+    watching_time = settings[2]
+    print(settings)
 
     with open("proxy.txt", "r") as f:
         try:
@@ -98,7 +107,7 @@ if __name__ == '__main__':
                                     port=port,
                                     query=query,
                                     search_title_video=search_title_video,
-                                    viewing_time=int(viewing_time))
+                                    viewing_time=int(watching_time))
 
                     i += 1
                     etc = time.time() - now_row
@@ -108,6 +117,7 @@ if __name__ == '__main__':
             finally:
                 ...
         finally:
-            driver.close()
+            if driver != None:
+                driver.close()
             etc = time.time() - now
             print("timer", etc)
