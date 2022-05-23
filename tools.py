@@ -43,11 +43,13 @@ def click_on_video_update(driver, wait, element, viewing_time):
             try:
                 div = driver.find_element(By.CLASS_NAME, "ytp-ad-skip-button-slot")
                 button = div.find_element(By.TAG_NAME, "div")
+
             except NoSuchElementException:
                 continue
             if button:
-                wait.until(ec.element_to_be_clickable(button)).click()
-                button.click()
+                wait.until(ec.element_to_be_clickable(button))
+                if button.text.find("ропусти"):
+                    button.click()
 
     finally:
         time.sleep(viewing_time)

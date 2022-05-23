@@ -1,8 +1,3 @@
-95.164.135.241:6774:ekioecgp:q3wa9mpup8qq
-144.168.220.85:8131:ekioecgp:q3wa9mpup8qq
-104.227.1.249:7845:ekioecgp:q3wa9mpup8qq
-186.179.29.65:5379:ekioecgp:q3wa9mpup8qq
-94.131.81.134:6274:ekioecgp:q3wa9mpup8qq
 31.12.95.144:5254:ekioecgp:q3wa9mpup8qq
 107.152.197.31:8053:ekioecgp:q3wa9mpup8qq
 45.57.252.217:8753:ekioecgp:q3wa9mpup8qq
