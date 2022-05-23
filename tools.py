@@ -7,6 +7,11 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver import ActionChains
 
 
+def get_filter_list(path_file):
+    with open(path_file, "r") as f:
+        return [x.strip() for x in f.readlines()]
+
+
 def click_on_video_update(driver, wait, element, viewing_time):
     try:
         action = ActionChains(driver)
@@ -17,7 +22,13 @@ def click_on_video_update(driver, wait, element, viewing_time):
         action.move_to_element_with_offset(body, 0, 0)
 
         time.sleep(5)
-        action.move_by_offset(-500, 500).click().perform()
+        try:
+            advertising_btn_s = driver.find_elements(By.CLASS_NAME, 'ytp-ad-image')
+        except Exception as e:
+            advertising_btn_s = None
+        if not advertising_btn_s:
+            print('NO!')
+            action.move_by_offset(-500, 500).click().perform()
 
         now = time.time() + viewing_time + 20
         i = 0
@@ -52,3 +63,32 @@ def click_on_video_update(driver, wait, element, viewing_time):
     finally:
         time.sleep(viewing_time)
         driver.close()
+
+
+def click_on_filter(driver, wait, file_path):
+    filter_list = get_filter_list(file_path)
+    wait.until(ec.presence_of_element_located((By.ID, "filter-menu")))
+    filter_menu = driver.find_element(By.ID, "filter-menu")
+    filter_click = filter_menu.find_element(By.TAG_NAME, "a")
+    filter_click.click()
+    time.sleep(1)
+    elements_by_class_name = filter_menu.find_elements(By.CLASS_NAME, "style-scope ytd-search-filter-renderer")
+
+    for i, filter_name in enumerate(filter_list, 1):
+        for element in elements_by_class_name:
+            elements_by_tag = element.find_elements(By.TAG_NAME, "div")
+            for element_tag in elements_by_tag:
+
+                if element_tag.text.lower().count(filter_name.lower()):
+                    element_tag.click()
+                    time.sleep(1)
+                    if i != len(filter_list):
+                        filter_click.click()
+                    time.sleep(1)
+    return True
+
+
+
+
+
+

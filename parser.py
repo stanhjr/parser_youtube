@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from fake_useragent import UserAgent
 
-from tools import click_on_video_update
+from tools import click_on_video_update, click_on_filter
 
 
 def get_name_search(query_name: str) -> str:
@@ -47,6 +47,7 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
         scroll = 1200
 
         wait.until(ec.presence_of_element_located((By.CLASS_NAME, "style-scope ytd-video-renderer")))
+        click_on_filter(driver, wait, "filter_settings.txt")
 
         elements = set(driver.find_elements(By.CSS_SELECTOR, "#video-title.ytd-video-renderer"))
         for element in elements:
