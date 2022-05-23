@@ -6,8 +6,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from fake_useragent import UserAgent
 
-from tools import click_on_video, click_on_video_update
-from video_settings import QUERY, SEARCH_TITLE_VIDEO, WATCHING_TIME
+from tools import click_on_video_update
 
 
 def get_name_search(query_name: str) -> str:
@@ -16,6 +15,11 @@ def get_name_search(query_name: str) -> str:
         res = '+'.join(res)
         return res
     return query_name
+
+
+def get_video_settings(path_file):
+    with open(path_file, "r") as f:
+        return [x.strip() for x in f.readlines()]
 
 
 def parser(login, password, ip, port, query, search_title_video, viewing_time):
@@ -49,7 +53,7 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
             if search_title_video == element.text:
                 print(i)
                 print('FIND!')
-                click_on_video(driver=driver, wait=wait, element=element, viewing_time=viewing_time)
+                click_on_video_update(driver=driver, wait=wait, element=element, viewing_time=viewing_time)
                 raise KeyError
         while True:
 
@@ -77,8 +81,8 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
 
 if __name__ == '__main__':
     now = time.time()
-
-    query = get_name_search(QUERY)
+    query, search_title_video, viewing_time = get_video_settings("video_settings.txt")
+    query = get_name_search(query)
 
     with open("proxy.txt", "r") as f:
         try:
@@ -93,8 +97,8 @@ if __name__ == '__main__':
                                     login=login,
                                     port=port,
                                     query=query,
-                                    search_title_video=SEARCH_TITLE_VIDEO,
-                                    viewing_time=int(WATCHING_TIME))
+                                    search_title_video=search_title_video,
+                                    viewing_time=int(viewing_time))
 
                     i += 1
                     etc = time.time() - now_row
