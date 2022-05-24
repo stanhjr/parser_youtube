@@ -5,8 +5,9 @@ import time
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from fake_useragent import UserAgent
+from webdriver_manager.chrome import ChromeDriverManager
 
-from tools import click_on_video_update, click_on_filter
+from tools import click_on_video_update, click_on_filter, disable_modal_window
 
 
 def get_name_search(query_name: str) -> str:
@@ -22,7 +23,7 @@ def get_video_settings(path_file):
         return [x.strip() for x in f.readlines()]
 
 
-def parser(login, password, ip, port, query, search_title_video, viewing_time):
+def parser(login, password, ip, port, query, search_title_video, viewing_time, time_scroll):
     proxy_server = f"{ip}:{port}"
     proxy_options = {
         "proxy": {
@@ -33,9 +34,11 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
     options = webdriver.ChromeOptions()
     options.add_argument(f"user-agent={user_agent.random}")
 
-    driver = webdriver.Chrome("/usr/bin/chromedriver",
-                              options=options,
-                              seleniumwire_options=proxy_options)
+    prefs = {"profile.managed_default_content_settings.images": 2}
+    options.add_experimental_option("prefs", prefs)
+
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, seleniumwire_options=proxy_options)
+
     driver.maximize_window()
 
     driver.get(f"https://www.youtube.com/results?search_query={query}")
@@ -45,10 +48,10 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
     try:
         i = 0
         scroll = 1200
-
         wait.until(ec.presence_of_element_located((By.CLASS_NAME, "style-scope ytd-video-renderer")))
+        disable_modal_window(driver=driver)
         click_on_filter(driver, wait, "filter_settings.txt")
-
+        now_time = time.time() + int(time_scroll)
         elements = set(driver.find_elements(By.CSS_SELECTOR, "#video-title.ytd-video-renderer"))
         for element in elements:
             if search_title_video == element.text:
@@ -57,6 +60,8 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
                 click_on_video_update(driver=driver, wait=wait, element=element, viewing_time=viewing_time)
                 raise KeyError
         while True:
+            if time.time() > now_time:
+                raise KeyError
 
             driver.execute_script(f"window.scrollTo(0, {scroll})")
             time.sleep(0.5)
@@ -81,9 +86,19 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
 
 
 if __name__ == '__main__':
+    driver = None
     now = time.time()
-    query, search_title_video, viewing_time = get_video_settings("video_settings.txt")
-    query = get_name_search(query)
+
+    settings = []
+    with open("settings.txt", "r", encoding='utf-8') as f:
+        for line in f.readlines():
+            settings.append(line.replace("\n", ""))
+
+    query = get_name_search(settings[0])
+    search_title_video = settings[1]
+    watching_time = settings[2]
+    time_scroll = settings[3]
+    print(settings)
 
     with open("proxy.txt", "r") as f:
         try:
@@ -99,7 +114,8 @@ if __name__ == '__main__':
                                     port=port,
                                     query=query,
                                     search_title_video=search_title_video,
-                                    viewing_time=int(viewing_time))
+                                    viewing_time=int(watching_time),
+                                    time_scroll=time_scroll)
 
                     i += 1
                     etc = time.time() - now_row
@@ -109,6 +125,7 @@ if __name__ == '__main__':
             finally:
                 ...
         finally:
-            driver.close()
+            if driver:
+                driver.close()
             etc = time.time() - now
             print("timer", etc)
