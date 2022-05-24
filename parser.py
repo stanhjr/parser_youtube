@@ -122,7 +122,7 @@ if __name__ == '__main__':
             finally:
                 ...
         finally:
-            if driver != None:
+            if driver:
                 driver.close()
             etc = time.time() - now
             print("timer", etc)

@@ -32,7 +32,7 @@ def click_on_video_update(driver, wait, element, viewing_time):
         action.move_by_offset(-500, 500).click().perform()
         time.sleep(1)
         try:
-            driver.execute_script("document.getElementsByClassName('html5-video-player ytp-transparent ytp-exp-bottom-control-flexbox ytp-larger-tap-buttons ytp-exp-ppp-update ytp-large-width-mode ytp-autonav-endscreen-cancelled-state ytp-fit-cover-video ytp-iv-drawer-enabled ad-created ytp-hide-info-bar paused-mode')[0].click()")
+            driver.execute_script("document.getElementsByClassName('paused-mode')[0].click()")
         except:
             ...
         now = time.time() + viewing_time + 20
