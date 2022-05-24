@@ -43,7 +43,10 @@ def click_on_video_update(driver, wait, element, viewing_time):
             print('NO!')
             action.move_by_offset(-500, 500).click().perform()
             time.sleep(0.4)
-            driver.execute_script("document.getElementsByClassName('ytp-play-button ytp-button')[0].click();")
+            try:
+                driver.execute_script("document.getElementsByClassName('paused-mode')[0].click()")
+            except:
+                ...
 
         now = time.time() + viewing_time + 20
         i = 0
