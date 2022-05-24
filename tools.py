@@ -35,7 +35,6 @@ def click_on_video_update(driver, wait, element, viewing_time):
         i = 0
         while time.time() < now:
             i += 1
-            print(i)
             time.sleep(1)
             try:
                 advertising_btn_s = driver.find_elements(By.CLASS_NAME, 'ytp-ad-image')
