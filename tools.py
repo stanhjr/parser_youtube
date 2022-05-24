@@ -7,12 +7,24 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver import ActionChains
 
 
+def disable_modal_window(driver):
+    try:
+        driver.find_element(By.ID, "dialog")
+        time.sleep(1)
+        driver.execute_script("document.getElementById('dialog').style.display = 'none';")
+        time.sleep(0.5)
+        driver.execute_script("document.getElementsByTagName('tp-yt-iron-overlay-backdrop')[0].style.display = 'none';")
+    except:
+        ...
+
+
 def click_on_video_update(driver, wait, element, viewing_time):
     try:
         action = ActionChains(driver)
         driver.execute_script(f"window.scrollTo(0, {element.location.get('y')})")
         driver.execute_script("arguments[0].click();", element)
         wait.until(ec.presence_of_element_located((By.CLASS_NAME, "style-scope ytd-watch-metadata")))
+
         body = driver.find_element(By.TAG_NAME, 'body')
         action.move_to_element_with_offset(body, 0, 0)
 

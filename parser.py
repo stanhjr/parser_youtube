@@ -1,14 +1,14 @@
+import time
+
 from selenium.common.exceptions import InvalidSessionIdException
 from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
-import time
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from fake_useragent import UserAgent
-# from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-from tools import click_on_video_update
+from tools import click_on_video_update, disable_modal_window
 
 
 def get_name_search(query_name: str) -> str:
@@ -19,7 +19,7 @@ def get_name_search(query_name: str) -> str:
     return query_name
 
 
-def parser(login, password, ip, port, query, search_title_video, viewing_time):
+def parser(login, password, ip, port, query, search_title_video, viewing_time, time_scroll):
     proxy_server = f"{ip}:{port}"
     proxy_options = {
         "proxy": {
@@ -35,6 +35,7 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
     options.add_experimental_option("prefs", prefs)
 
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, seleniumwire_options=proxy_options)
+
     driver.maximize_window()
 
     driver.get(f"https://www.youtube.com/results?search_query={query}")
@@ -42,9 +43,10 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
     wait = WebDriverWait(driver, 10)
 
     try:
+        now_time = time.time() + int(time_scroll)
         i = 0
         scroll = 1200
-
+        disable_modal_window(driver=driver)
         wait.until(ec.presence_of_element_located((By.CLASS_NAME, "style-scope ytd-video-renderer")))
 
         elements = set(driver.find_elements(By.CSS_SELECTOR, "#video-title.ytd-video-renderer"))
@@ -55,7 +57,8 @@ def parser(login, password, ip, port, query, search_title_video, viewing_time):
                 click_on_video_update(driver=driver, wait=wait, element=element, viewing_time=viewing_time)
                 raise KeyError
         while True:
-
+            if time.time() > now_time:
+                raise KeyError
             driver.execute_script(f"window.scrollTo(0, {scroll})")
             time.sleep(0.5)
             elements2 = set(driver.find_elements(By.CSS_SELECTOR, "#video-title.ytd-video-renderer"))
@@ -91,6 +94,7 @@ if __name__ == '__main__':
     query = get_name_search(settings[0])
     search_title_video = settings[1]
     watching_time = settings[2]
+    time_scroll = settings[3]
     print(settings)
 
     with open("proxy.txt", "r") as f:
@@ -107,7 +111,8 @@ if __name__ == '__main__':
                                     port=port,
                                     query=query,
                                     search_title_video=search_title_video,
-                                    viewing_time=int(watching_time))
+                                    viewing_time=int(watching_time),
+                                    time_scroll=time_scroll)
 
                     i += 1
                     etc = time.time() - now_row
