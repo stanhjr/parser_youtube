@@ -28,9 +28,13 @@ def click_on_video_update(driver, wait, element, viewing_time):
         body = driver.find_element(By.TAG_NAME, 'body')
         action.move_to_element_with_offset(body, 0, 0)
 
-        time.sleep(5)
+        time.sleep(4)
         action.move_by_offset(-500, 500).click().perform()
-
+        time.sleep(1)
+        try:
+            driver.execute_script("document.getElementsByClassName('html5-video-player ytp-transparent ytp-exp-bottom-control-flexbox ytp-larger-tap-buttons ytp-exp-ppp-update ytp-large-width-mode ytp-autonav-endscreen-cancelled-state ytp-fit-cover-video ytp-iv-drawer-enabled ad-created ytp-hide-info-bar paused-mode')[0].click()")
+        except:
+            ...
         now = time.time() + viewing_time + 20
         i = 0
         while time.time() < now:
