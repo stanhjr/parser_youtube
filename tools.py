@@ -97,7 +97,8 @@ def click_on_filter(driver, wait, file_path):
             for element_tag in elements_by_tag:
 
                 if element_tag.text.lower().count(filter_name.lower()):
-                    element_tag.click()
+                    driver.execute_script("arguments[0].click();", element_tag)
+                    # element_tag.click()
                     time.sleep(1)
                     if i != len(filter_list):
                         filter_click.click()
