@@ -103,9 +103,3 @@ def click_on_filter(driver, wait, file_path):
                         filter_click.click()
                     time.sleep(1)
     return True
-
-
-
-
-
-
